@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--browser",
+        "--browser-name",
         action="store",
         default="chromium",
         choices=["chromium", "firefox", "webkit"],
@@ -15,7 +15,7 @@ def pytest_addoption(parser):
 
 @pytest.fixture(scope="function")
 def page(request):
-    browser_name = request.config.getoption("--browser")
+    browser_name = request.config.getoption("--browser-name")
     headless = os.getenv("CI", "false").lower() == "true"
     with sync_playwright() as p:
         if browser_name == "chromium":
@@ -26,7 +26,10 @@ def page(request):
             browser = p.webkit.launch(headless=headless)
         else:
             raise ValueError(f"Unsupported browser: {browser_name}")
+        
         page = browser.new_page()
+
         yield page
+        
         page.close()
         browser.close()
