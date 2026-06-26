@@ -5,14 +5,16 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]  # rulare paralelă
+        browser: [chromium, firefox, webkit]
 
     steps:
       - name: Checkout code
@@ -25,11 +27,17 @@ jobs:
 
       - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest-html
 
-      - name: Install Playwright browsers
+      - name: Install Playwright browser
         run: |
-          playwright install --with-deps ${{ matrix.browser }}
+          python -m playwright install --with-deps ${{ matrix.browser }}
+
+      - name: Create reports folder
+        run: |
+          mkdir -p reports
 
       - name: Run tests
         run: |
@@ -41,7 +49,7 @@ jobs:
 
       - name: Upload report
         uses: actions/upload-artifact@v4
-        if: always()   # upload chiar dacă testele pică
+        if: always()
         with:
           name: report-${{ matrix.browser }}
           path: reports/report-${{ matrix.browser }}.html
