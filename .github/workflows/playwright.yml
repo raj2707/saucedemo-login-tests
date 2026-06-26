@@ -34,7 +34,7 @@ jobs:
       - name: Run tests
         run: |
           pytest tests/ \
-            --browser ${{ matrix.browser }} \
+            --browser-name ${{ matrix.browser }} \
             --html=reports/report-${{ matrix.browser }}.html \
             --self-contained-html \
             -v
